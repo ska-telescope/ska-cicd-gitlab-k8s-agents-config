@@ -1,0 +1,8 @@
+gitops:
+  manifest_projects:
+  - id: ska-telescope/sdi/ska-cicd-deploy-gitlab-runners
+    paths:
+    - glob: '/manifests/psi-low/*.yaml'
+ci_access:
+  projects:
+  - id: ska-telescope/ska-low-cbf
