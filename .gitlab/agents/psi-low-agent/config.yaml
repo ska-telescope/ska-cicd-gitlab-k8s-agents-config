@@ -5,4 +5,4 @@ gitops:
     - glob: '/manifests/psi-low/*.yaml'
 ci_access:
   projects:
-  - id: ska-telescope/ska-low-cbf
+  - id: "15856638"
