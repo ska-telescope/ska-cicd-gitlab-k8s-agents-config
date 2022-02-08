@@ -6,3 +6,4 @@ gitops:
 ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
+  - id: ska-telescope/ska-low-cbf
