@@ -4,5 +4,5 @@ gitops:
     paths:
     - glob: '/manifests/psi-low/*.yaml'
 ci_access:
-  projects:
-  - id: "15856638"
+  groups:
+  - id: ska-telescope
