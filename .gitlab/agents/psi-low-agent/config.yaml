@@ -4,5 +4,5 @@ gitops:
     paths:
     - glob: '/manifests/psi-low/*.yaml'
 ci_access:
-  groups:
-  - id: "3180705"
+  projects:
+  - id: ska-telescope/sdi/ska-cicd-stencil
