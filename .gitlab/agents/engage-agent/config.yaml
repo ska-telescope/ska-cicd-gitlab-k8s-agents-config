@@ -6,5 +6,3 @@ gitops:
 ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
-    access_as:
-      ci_job: {}
