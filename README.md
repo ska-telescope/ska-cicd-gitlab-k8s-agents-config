@@ -97,7 +97,7 @@ Set KUBE_CONTEXT for the jobs.
 https://gitlab.com/ska-telescope/ska-low-cbf/-/commit/60f4e04ed7964e6d882afdc891565d7a1b998c6a
 
 
-Altough deployments were possible, for the agent might be an alternative for psilow it
+Altough deployments were possible, for the agent to be an alternative for psilow it
 will require changing the way we handle k8s in the pipeline
 (or add new behavior based on a tag with "agentk-" in the name).
 
