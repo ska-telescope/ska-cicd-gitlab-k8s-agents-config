@@ -79,6 +79,7 @@ data:
     [[runners]]
       environment = ["FF_GITLAB_REGISTRY_HELPER_IMAGE=1","HTTP_PROXY=http://delphoenix.atnf.csiro.au:8888","HTTPS_PROXY=http://delphoenix.atnf.csiro.au:8888","NO_PROXY=localhost,127.0.0.1,10.96.0.0/12,192.168.0.0/16,202.9.15.0/24,172.17.0.1/16","http_proxy=http://delphoenix.atnf.csiro.au:8888","https_proxy=http://delphoenix.atnf.csiro.au:8888","no_proxy=localhost,127.0.0.1,10.96.0.0/12,192.168.0.0/16,202.9.15.0/24,172.17.0.1/16"]
       pre_build_script = """
+        kubectl config use-context ska-telescope/ska-cicd-gitlab-k8s-agents-config:psi-low-agent
         echo "This is a pre-build script for SKAMPI."
         echo "Project: ${CI_PROJECT_NAME}"
         echo "Namespace: ${KUBE_NAMESPACE}"
