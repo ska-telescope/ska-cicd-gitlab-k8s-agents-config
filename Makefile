@@ -4,7 +4,7 @@ AGENT_TOKEN ?=
 NAMESPACE ?= gitlab
 MINIO_USERNAME ?=
 MINIO_PASSWORD ?=
-TOKEN ?=
+RUNNER_REGISTRATION_TOKEN ?=
 
 .DEFAULT_GOAL := help
 
@@ -19,7 +19,7 @@ vars:  ## Variables
 	@echo "NAMESPACE=$(NAMESPACE)"
 	@echo "MINIO_USERNAME=$(MINIO_USERNAME)"
 	@echo "MINIO_PASSWORD=$(MINIO_PASSWORD)"
-	@echo "TOKEN=$(TOKEN)"
+	@echo "RUNNER_REGISTRATION_TOKEN=$(RUNNER_REGISTRATION_TOKEN)"
 
 generate-agent-manifest:
 	docker run --pull=always --rm registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/cli:stable generate \
@@ -35,7 +35,7 @@ agent-runner-secrets:
 	kubectl create secret generic gitlab-runner-gitlab-runner \
 		--from-literal=gitlab-s3-access-key=$(MINIO_USERNAME) \
 		--from-literal=gitlab-s3-secret-key=$(MINIO_PASSWORD) \
-		--from-literal=runner-registration-token=$(TOKEN) \
+		--from-literal=runner-registration-token=$(RUNNER_REGISTRATION_TOKEN) \
 		--from-literal=runner-token= \
 		--namespace -n $(NAMESPACE) \
 		--dry-run=client -o=yaml | kubectl apply -f -

@@ -121,6 +121,6 @@ To simplify this process, the `agent-runner-secrets` make target was created whi
 ```console
 MINIO_USERNAME=... # The MinIO Access Key for GitLab Runners
 MINIO_PASSWORD=... # The MinIO Secret Key for GitLab Runners
-TOKEN=... # The runner registration token.
+RUNNER_REGISTRATION_TOKEN=... # The runner registration token.
 NAMESPACE=... # The kubernetes namespace to install the secrets to. Defaults to `gitlab`.
 ```
