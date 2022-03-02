@@ -37,7 +37,7 @@ agent-runner-secrets:
 		--from-literal=gitlab-s3-secret-key=$(MINIO_PASSWORD) \
 		--from-literal=runner-registration-token=$(RUNNER_REGISTRATION_TOKEN) \
 		--from-literal=runner-token= \
-		--namespace -n $(NAMESPACE) \
+		--namespace $(NAMESPACE) \
 		--dry-run=client -o=yaml | kubectl apply -f -
 
 help:  ## Show this help.
