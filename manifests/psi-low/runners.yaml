@@ -254,7 +254,7 @@ spec:
       initContainers:
       - name: configure
         command: ['sh', '/configmaps/configure']
-        image: gitlab/gitlab-runner:alpine-v14.7.0
+        image: gitlab/gitlab-runner:alpine-v14.9.0
         imagePullPolicy: "IfNotPresent"
         securityContext:
           allowPrivilegeEscalation: false
@@ -296,7 +296,7 @@ spec:
       serviceAccountName: ""
       containers:
       - name: gitlab-runner-gitlab-runner
-        image: gitlab/gitlab-runner:alpine-v14.7.0
+        image: gitlab/gitlab-runner:alpine-v14.9.0
         imagePullPolicy: "IfNotPresent"
         securityContext:
           allowPrivilegeEscalation: false
