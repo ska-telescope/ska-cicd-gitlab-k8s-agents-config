@@ -48,6 +48,15 @@ subjects:
   namespace: gitlab
 ---
 apiVersion: v1
+kind: ConfigMap
+namespace: gitlab
+metadata:
+  labels:
+    app: gitlab-runner-gitlab-runner
+    chart: gitlab-runner-0.39.0
+    heritage: Helm
+    release: gitlab-runner
+  name: gitlab-runner-gitlab-runner
 data:
   check-live: |
     #!/bin/bash
@@ -214,15 +223,7 @@ data:
     done
 
     exit 0
-kind: ConfigMap
-namespace: gitlab
-metadata:
-  labels:
-    app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.39.0
-    heritage: Helm
-    release: gitlab-runner
-  name: gitlab-runner-gitlab-runner
+
 ---
 apiVersion: v1
 kind: Service
