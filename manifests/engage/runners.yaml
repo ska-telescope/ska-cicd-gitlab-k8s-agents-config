@@ -99,6 +99,11 @@ data:
           if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} != staging* ]]; then
             echo "Non-standard SKAMPI namespace detected, please contact System team."
           fi
+          if [[ ! -z ${KUBE_NAMESPACE} ]]; then
+            kubectl create namespace ${KUBE_NAMESPACE}
+            curl https://gitlab.com/ska-telescope/templates-repository/-/raw/st-1162/scripts/namespace_auth.sh > namespace_auth.sh && chmod +x namespace_auth.sh && ./namespace_auth.sh ${KUBE_NAMESPACE} ${KUBE_NAMESPACE} && rm namespace_auth.sh
+            curl https://artefact.skao.int/repository/k8s-ci-creds-internal/k8s-${KUBE_NAMESPACE}-${KUBE_NAMESPACE}-conf --output ${KUBECONFIG}
+          fi
         fi
       """
       [runners.kubernetes]
