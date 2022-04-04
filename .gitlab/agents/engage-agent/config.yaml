@@ -9,4 +9,4 @@ ci_access:
   - id: ska-telescope/ska-tango-examples
     access_as:
       impersonate: 
-        username: "system:serviceaccount:ska-tango-examples:ska-tango-examples-ska-tango-examples-kubernetes"
+        username: "system:serviceaccount:ska-tango-examples:ska-tango-examples"
