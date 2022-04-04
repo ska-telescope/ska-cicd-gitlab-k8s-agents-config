@@ -72,6 +72,8 @@ data:
           else 
             kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE}
             kubectl create namespace ${KUBE_NAMESPACE}
+            curl https://gitlab.com/ska-telescope/templates-repository/-/raw/master/scripts/namespace_auth.sh > namespace_auth.sh && chmod +x namespace_auth.sh && ./namespace_auth.sh ${KUBE_NAMESPACE} ${KUBE_NAMESPACE} && rm namespace_auth.sh
+            curl https://artefact.skao.int/repository/k8s-ci-creds-internal/k8s-${KUBE_NAMESPACE}-${KUBE_NAMESPACE}-conf --output ${KUBECONFIG}
           fi
           if [[ -n "${KUBE_NAMESPACE_SDP}" ]]; then
             kubectl describe namespace ${KUBE_NAMESPACE_SDP} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
