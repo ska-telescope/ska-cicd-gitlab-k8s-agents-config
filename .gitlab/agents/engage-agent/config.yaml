@@ -3,9 +3,6 @@ gitops:
   - id: ska-telescope/ska-cicd-gitlab-k8s-agents-config
     paths:
     - glob: '/manifests/engage/*.yaml'
-observability: 
-  logging: 
-    level: debug
 ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
