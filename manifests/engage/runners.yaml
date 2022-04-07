@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations: null
+  namespace: gitlab
   labels:
     app: gitlab-runner-gitlab-runner
     chart: gitlab-runner-0.39.0
@@ -187,6 +188,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
+  namespace: gitlab
 ---
 apiVersion: v1
 kind: Service
@@ -194,6 +196,7 @@ metadata:
   labels:
     app: gitlab-runner-metrics
   name: gitlab-runner-metrics
+  namespace: gitlab
 spec:
   ports:
   - name: metrics
@@ -213,6 +216,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
+  namespace: gitlab
 spec:
   replicas: 1
   revisionHistoryLimit: 10
