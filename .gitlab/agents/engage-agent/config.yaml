@@ -3,6 +3,9 @@ gitops:
     - id: ska-telescope/ska-cicd-gitlab-k8s-agents-config
       paths:
         - glob: "/manifests/engage/*.yaml"
+    - id: ska-telescope/ska-tango-examples
+      paths:
+        - glob: "/manifests/engage/*.yaml"
 observability:
   logging:
     level: debug
