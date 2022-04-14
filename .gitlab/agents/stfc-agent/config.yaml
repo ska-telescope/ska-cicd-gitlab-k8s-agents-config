@@ -7,5 +7,5 @@ ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
   - id: ska-telescope/ska-tango-examples
-    access_as:
-      ci_job: {}
+  #  access_as:
+  #    ci_job: {}
