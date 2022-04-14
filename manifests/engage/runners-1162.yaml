@@ -239,7 +239,7 @@ metadata:
 spec:
   ports:
     - name: metrics
-      nodePort: 30929
+      nodePort: 30930
       port: 9252
       targetPort: metrics
   selector:
