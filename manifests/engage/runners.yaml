@@ -97,13 +97,6 @@ data:
           fi
         fi
       """
-      post_build_script = """
-        if [[ -n "${SKA_AGENT_NAME}" ]]; then
-          echo "Agent configuration detected, setting context for after_script."
-          kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
-          kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
-        fi
-      """
       [runners.kubernetes]
         name = "SKA-K8s-Runner-Engage"
         image = "ubuntu:20.04"
