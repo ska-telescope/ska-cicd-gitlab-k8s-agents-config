@@ -58,39 +58,76 @@ data:
     else
       exit 1
     fi
-  config.template.toml: "[[runners]]\n  pre_build_script = \"\"\"\n    echo \"This
-    is a pre-build script for SKAMPI.\"\n    echo \"Project: ${CI_PROJECT_NAME}\"\n
-    \   echo \"Namespace: ${KUBE_NAMESPACE}\"\n    if [[ ${CI_PROJECT_NAME} == \"ska-skampi\"
-    ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then\n
-    \     echo \"Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}.\"\n
-    \     kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$?
-    || K_DESC=$?\n      if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == \"true\"
-    ]] ; then\n        kubectl describe namespace ${KUBE_NAMESPACE};\n      else \n
-    \       kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE}\n        kubectl
-    create namespace ${KUBE_NAMESPACE}\n      fi\n      if [[ -n \"${KUBE_NAMESPACE_SDP}\"
-    ]]; then\n        kubectl describe namespace ${KUBE_NAMESPACE_SDP} > /dev/null
-    2>&1 && K_DESC=$? || K_DESC=$?\n        if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE}
-    == \"true\" ]] ; then \n          kubectl describe namespace ${KUBE_NAMESPACE_SDP};\n
-    \       else\n          kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE_SDP}\n
-    \         kubectl create namespace ${KUBE_NAMESPACE_SDP}\n        fi\n      fi\n
-    \     kubectl apply -f resources/namespace_with_quotas.yaml --namespace=${KUBE_NAMESPACE}\n
-    \   else\n      echo \"Nothing changed. You can ignore messages above this line.\"\n
-    \     if [[ ${CI_PROJECT_NAME} == \"ska-skampi\" ]] && [[ ${KUBE_NAMESPACE} !=
-    staging* ]]; then\n        echo \"Non-standard SKAMPI namespace detected, please
-    contact System team.\"\n      fi\n    fi\n  \"\"\"\n  [runners.kubernetes]\n    name
-    = \"SKA-K8s-Runner-Engage\"\n    image = \"ubuntu:20.04\"\n    helper_cpu_request
-    = \"100m\"\n    helper_memory_request = \"128Mi\"\n    service_cpu_request = \"100m\"\n
-    \   service_memory_request = \"128Mi\"\n    cpu_request = \"1000m\"\n    memory_request
-    = \"2Gi\"\n    cpu_request_overwrite_max_allowed = \"3000m\"\n    memory_request_overwrite_max_allowed
-    = \"8Gi\"\n    poll_timeout = 600\n    namespace = \"gitlab\"\n    privileged
-    = true\n    protected = false\n    pull_policy = [\"always\", \"if-not-present\"]\n
-    \ [runners.kubernetes.node_selector]\n    \"node-role.skatelescope.org/ci-worker\"
-    = \"true\"\n  [runners.cache]\n    Type = \"s3\"\n    Shared = true\n    [runners.cache.s3]\n
-    \     ServerAddress = \"https://k8s.stfc.skao.int:9443\"\n      BucketName = \"cache\"\n
-    \     BucketLocation = \"\"\n      Insecure = true\n      AuthenticationType =
-    \"access-key\"\n  [runners.kubernetes.volumes]\n    [[runners.kubernetes.volumes.host_path]]\n
-    \     name = \"docker\"\n      mount_path = \"/var/run/docker.sock\"\n      host_path
-    \ = \"/var/run/docker.sock\"\n"
+  config.template.toml: |
+    [[runners]]
+      pre_build_script = """
+        echo "This is a pre-build script for SKA."
+        echo "Project: ${CI_PROJECT_NAME}"
+        echo "Namespace: ${KUBE_NAMESPACE}"
+        if [[ -n "${SKA_AGENT_NAME}"]]; then
+          echo "Agent configuration detected, setting context and creating namespace."
+          kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
+          kubectl create namespace ${KUBE_NAMESPACE}
+          kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+        fi
+        if [[ ${CI_PROJECT_NAME} == "ska-skampi"]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
+          echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
+          kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
+          if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true"]] ; then
+            kubectl describe namespace ${KUBE_NAMESPACE};
+          else
+            kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE}
+            kubectl create namespace ${KUBE_NAMESPACE}
+          fi
+          if [[ -n "${KUBE_NAMESPACE_SDP}"]]; then
+            kubectl describe namespace ${KUBE_NAMESPACE_SDP} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
+            if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]] ; then
+              kubectl describe namespace ${KUBE_NAMESPACE_SDP};
+            else
+              kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE_SDP}
+              kubectl create namespace ${KUBE_NAMESPACE_SDP}
+            fi
+          fi
+          kubectl apply -f resources/namespace_with_quotas.yaml --namespace=${KUBE_NAMESPACE}
+        else
+          echo "Nothing changed. You can ignore messages above this line."
+          if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} != staging* ]]; then
+            echo "Non-standard SKAMPI namespace detected, please contact System team."
+          fi
+        fi
+      """
+      [runners.kubernetes]
+        name = "SKA-K8s-Runner-Engage"
+        image = "ubuntu:20.04"
+        helper_cpu_request = "100m"
+        helper_memory_request = "128Mi"
+        service_cpu_request = "100m"
+        service_memory_request = "128Mi"
+        cpu_request = "1000m"
+        memory_request = "2Gi"
+        cpu_request_overwrite_max_allowed = "3000m"
+        memory_request_overwrite_max_allowed = "8Gi"
+        poll_timeout = 600
+        namespace = "gitlab"
+        privileged = true
+        protected = false
+        pull_policy = ["always", "if-not-present"]
+      [runners.kubernetes.node_selector]
+        "node-role.skatelescope.org/ci-worker" = "true"
+      [runners.cache]
+        Type = "s3"
+        Shared = true
+        [runners.cache.s3]
+          ServerAddress = "https://k8s.stfc.skao.int:9443"
+          BucketName = "cache"
+          BucketLocation = ""
+          Insecure = true
+          AuthenticationType = "access-key"
+      [runners.kubernetes.volumes]
+        [[runners.kubernetes.volumes.host_path]]
+          name = "docker"
+          mount_path = "/var/run/docker.sock"
+          host_path = "/var/run/docker.sock"
   config.toml: |
     concurrent = 20
     check_interval = 3
