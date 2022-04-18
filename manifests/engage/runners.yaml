@@ -72,10 +72,10 @@ data:
           kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
           kubectl config get-contexts
         fi
-        if [[ ${CI_PROJECT_NAME} == "ska-skampi"]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
+        if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
           echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
           kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
-          if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true"]] ; then
+          if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]] ; then
             kubectl describe namespace ${KUBE_NAMESPACE};
           else
             kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE}
