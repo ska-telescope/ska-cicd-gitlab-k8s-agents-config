@@ -70,7 +70,6 @@ data:
           kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
           kubectl create namespace ${KUBE_NAMESPACE}
           kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
-          kubectl config get-contexts
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
           echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
@@ -96,6 +95,13 @@ data:
           if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} != staging* ]]; then
             echo "Non-standard SKAMPI namespace detected, please contact System team."
           fi
+        fi
+      """
+      post_build_script = """
+        if [[ -n "${SKA_AGENT_NAME}" ]]; then
+          echo "Agent configuration detected, setting context for after_script."
+          kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
+          kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
         fi
       """
       [runners.kubernetes]
