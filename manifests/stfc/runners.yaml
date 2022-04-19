@@ -76,10 +76,9 @@ data:
         echo "Agent: ${SKA_AGENT_NAME}"
         if [[ -n "${SKA_AGENT_NAME}" ]]; then
           echo "Agent configuration detected, setting context and creating namespace."
-          sed -Ei "s/current-context:.*/current-context: ska-telescope\\/ska-cicd-gitlab-k8s-agents-config:${SKA_AGENT_NAME}/g" ${KUBECONFIG}
-          # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
-          # kubectl create namespace ${KUBE_NAMESPACE}
-          # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+          kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
+          kubectl create namespace ${KUBE_NAMESPACE}
+          kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
           echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
