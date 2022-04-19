@@ -9,4 +9,4 @@ ci_access:
   - id: ska-telescope/ska-tango-examples
     access_as:
       impersonate:
-        username: "system:serviceaccount:gitlab:ska-tango-examples"
+        username: "system:serviceaccount:gitlab-1131:ska-tango-examples"
