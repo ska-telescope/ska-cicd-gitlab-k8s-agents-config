@@ -7,5 +7,6 @@ ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
   - id: ska-telescope/ska-tango-examples
-  #  access_as:
-  #    ci_job: {}
+    access_as:
+      impersonate:
+        username: "system:serviceaccount:gitlab:ska-tango-examples"
