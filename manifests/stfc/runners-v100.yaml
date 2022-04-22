@@ -125,6 +125,8 @@ data:
       [runners.kubernetes.node_selector]
         "node-role.skatelescope.org/ci-worker" = "true"
         "kubernetes.io/hostname" = ["systems-k8s1-v100-worker-0"]
+      [runners.kubernetes.node_tolerations]
+        "nvidia.com/gpu" = "NoExecute"
       [runners.cache]
         Type = "s3"
         Shared = true
