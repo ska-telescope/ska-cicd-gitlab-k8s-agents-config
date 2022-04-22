@@ -124,9 +124,18 @@ data:
         pull_policy = ["always", "if-not-present"]
       [runners.kubernetes.node_selector]
         "node-role.skatelescope.org/ci-worker" = "true"
-        "kubernetes.io/hostname" = ["systems-k8s1-v100-worker-0"]
       [runners.kubernetes.node_tolerations]
         "nvidia.com/gpu=true" = "NoExecute"
+      [runners.kubernetes.affinity]
+      [runners.kubernetes.affinity.node_affinity]
+      [runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution]
+        [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms]]
+          [[runners.kubernetes.affinity.node_affinity.required_during_scheduling_ignored_during_execution.node_selector_terms.match_expressions]]
+            key = "kubernetes.io/hostname"
+            operator = "In"
+            values = [
+              "systems-k8s1-v100-worker-0"
+            ]
       [runners.cache]
         Type = "s3"
         Shared = true
