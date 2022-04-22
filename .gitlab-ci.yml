@@ -25,6 +25,13 @@ stages:
   - publish
   - scan
 
+dummy:
+  stage: test
+  tags:
+    - "k8srunner"
+  script:
+    - "make help"
+
 # .post step finalisers eg: badges
 include:
   - project: 'ska-telescope/templates-repository'
