@@ -119,6 +119,7 @@ data:
         memory_request_overwrite_max_allowed = "8Gi"
         poll_timeout = 600
         namespace = "gitlab-gpu-v100"
+        runtime_class_name = "nvidia"
         privileged = true
         protected = false
         pull_policy = ["always", "if-not-present"]
