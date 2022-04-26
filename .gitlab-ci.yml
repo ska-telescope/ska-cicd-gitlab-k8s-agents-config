@@ -26,11 +26,12 @@ stages:
   - scan
 
 dummy:
+  image: nvidia/cuda:11.0-base
   stage: test
   tags:
-    - "k8srunner"
+    - "k8srunner-gpu-v100"
   script:
-    - "make help"
+    - "nvidia-smi"
 
 # .post step finalisers eg: badges
 include:
