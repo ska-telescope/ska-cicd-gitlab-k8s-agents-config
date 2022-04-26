@@ -25,7 +25,7 @@ stages:
   - publish
   - scan
 
-dummy:
+gpu-v100-test:
   image: nvidia/cuda:11.0-base
   stage: test
   tags:
