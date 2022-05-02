@@ -74,15 +74,17 @@ data:
         echo "Project: ${CI_PROJECT_NAME}"
         echo "Namespace: ${KUBE_NAMESPACE}"
         echo "Agent: ${SKA_AGENT_NAME}"
+        kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
         if [[ -n "${SKA_AGENT_NAME}" ]]; then
           echo "Agent configuration detected, setting context and creating namespace."
           kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
-          kubectl create namespace ${KUBE_NAMESPACE}
+          if [[ ${K_DESC} -ne 0 ]] ; then
+            kubectl create namespace ${KUBE_NAMESPACE}
+          fi
           kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
           echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
-          kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
           if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]] ; then
             kubectl describe namespace ${KUBE_NAMESPACE};
           else
