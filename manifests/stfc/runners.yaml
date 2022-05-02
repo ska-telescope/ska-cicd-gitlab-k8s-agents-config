@@ -79,6 +79,7 @@ data:
           echo "Agent configuration detected, setting context and creating namespace."
           kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
           if [[ ${K_DESC} -ne 0 ]] ; then
+            echo "creating namespace"
             kubectl create namespace ${KUBE_NAMESPACE}
           fi
           kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
