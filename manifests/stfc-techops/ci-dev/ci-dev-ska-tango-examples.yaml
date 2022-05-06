@@ -163,6 +163,71 @@ data:
     if __name__ == '__main__':
         main()
 ---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/configmaps.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webjive-package-build-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+data:
+  build.sh: |
+    #!/bin/sh
+    set +e
+    cd /home/node/app
+    sed -i 's/"basename" : ""/"basename": "\/ci-dev-ska-tango-examples"/' /home/node/app/src/config.json
+    sed -i 's/"name":/"homepage": "\/ci-dev-ska-tango-examples", "name":/' /home/node/app/package.json
+    npm start
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/tangogql-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tangogql-config-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+data:
+  logging.yaml: |
+    ---
+      version: 1
+      disable_existing_loggers: False
+      formatters:
+        simple:
+          format: "1|%(asctime)s.%(msecs)03dZ|%(levelname)s|%(threadName)s|%(funcName)s|%(filename)s#%(lineno)d|%(message)s"
+      
+      handlers:
+        console:
+          class: logging.StreamHandler
+          level: CRITICAL
+          formatter: simple
+          stream: ext://sys.stdout
+      
+        info_file_handler:
+          class: logging.handlers.RotatingFileHandler
+          level: INFO
+          formatter: simple
+          filename: info.log
+          maxBytes: 10485760 # 10MB
+          backupCount: 20
+          encoding: utf8
+      
+        error_file_handler:
+          class: logging.handlers.RotatingFileHandler
+          level: ERROR
+          formatter: simple
+          filename: errors.log
+          maxBytes: 10485760 # 10MB
+          backupCount: 20
+          encoding: utf8
+      ## example how to configure a specific logger
+      #loggers:
+      #  my_module:
+      #    level: ERROR
+      #    handlers: [console]
+      #    propagate: no
+      ##
+      root:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+---
 # Source: ska-tango-examples-test-parent/charts/tango_example/templates/deviceservers.yaml
 ---
 # Device Server configuration
@@ -1249,6 +1314,47 @@ data:
     if __name__ == '__main__':
         main()
 ---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/mongodb-pv.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-ska-dashboard-repo-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: mongodb-ska-dashboard-repo-test
+    chart: ska-dashboard-repo-0.1.7
+    release: test
+    heritage: Helm
+spec:
+
+  storageClassName: nfss1
+  accessModes:
+    - ReadWriteMany
+
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/tangogql-pv.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tangogql-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: tangogql-ska-webjive-test
+    chart: ska-webjive-1.0.24
+    release: test
+    heritage: Helm
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+
+  storageClassName: nfss1
+  accessModes:
+  - ReadWriteMany
+---
 # Source: ska-tango-examples-test-parent/charts/ska-tango-base/templates/deviceservers.yaml
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1561,6 +1667,46 @@ roleRef:
   name: webjivetestdevice-role-test
   apiGroup: rbac.authorization.k8s.io
 ---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/dashboards.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboards-ska-dashboard-repo-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: dashboards-ska-dashboard-repo-test
+    chart: ska-dashboard-repo-0.1.7
+    release: test
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: dashboards-tcp
+    port: 3012
+    protocol: TCP
+  selector:
+    app: dashboards-ska-dashboard-repo-test
+---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/mongodb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-ska-dashboard-repo-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: mongodb-ska-dashboard-repo-test
+    chart: ska-dashboard-repo-0.1.7
+    release: test
+    heritage: Helm
+spec:
+  clusterIP: None
+  ports:
+  - name: mongodb
+    port: 27017
+    protocol: TCP
+  selector:
+    app: mongodb-ska-dashboard-repo-test
+---
 # Source: ska-tango-examples-test-parent/charts/ska-tango-base/templates/databaseds.yaml
 apiVersion: v1
 kind: Service
@@ -1652,6 +1798,67 @@ spec:
     domain: tango-configuration
     intent: production
     app: ska-tango-images
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive-auth/templates/auth.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webjive-auth-ska-webjive-auth-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: webjive-auth-ska-webjive-auth-test
+    chart: ska-webjive-auth-0.1.3
+    release: test
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: authserver-tcp
+    port: 8080
+    protocol: TCP
+  selector:
+    app: webjive-auth-ska-webjive-auth-test
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/tangogql.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: tangogql-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: tangogql-ska-webjive-test
+    chart: ska-webjive-1.0.24
+    release: test
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: tangogql-tcp
+    port: 5004
+    targetPort: tangogql-tcp
+    protocol: TCP
+  selector:
+    app: tangogql-ska-webjive-test
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/webjive.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webjive-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: webjive-ska-webjive-test
+    chart: ska-webjive-1.0.24
+    release: test
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+  - name: webjive-http
+    port: 80
+    protocol: TCP
+  selector:
+    app: webjive-ska-webjive-test
 ---
 # Source: ska-tango-examples-test-parent/charts/tango_example/templates/deviceservers.yaml
 # one k8s service per instance
@@ -2042,6 +2249,103 @@ spec:
   selector:
     subsystem: ska-tango-examples
     component: webjivetestdevice-test
+---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/dashboards.yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dashboards-ska-dashboard-repo-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: dashboards-ska-dashboard-repo-test
+    chart: ska-dashboard-repo-0.1.7
+    release: test
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: dashboards-ska-dashboard-repo-test
+  serviceName: dashboards-ska-dashboard-repo-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dashboards-ska-dashboard-repo-test
+        chart: ska-dashboard-repo-0.1.7
+        release: test
+        heritage: Helm
+    spec:
+      containers:
+      - name: dashboards
+        image: "artefact.skao.int/ska-dashboard-repo:1.1.0-develop-30"
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MONGO_HOST
+            value: "mongodb://mongodb-ska-dashboard-repo-test:27017/dashboards"
+          - name: SECRET
+            value: "s3cr3t"
+        ports:
+        - name: dashboards-tcp
+          containerPort: 3012
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/mongodb.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-ska-dashboard-repo-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: mongodb-ska-dashboard-repo-test
+    chart: ska-dashboard-repo-0.1.7
+    release: test
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: mongodb-ska-dashboard-repo-test
+  serviceName: mongodb-ska-dashboard-repo-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongodb-ska-dashboard-repo-test
+        chart: ska-dashboard-repo-0.1.7
+        release: test
+        heritage: Helm
+    spec:
+      containers:
+      - name: mongodb
+        image: "mongo:3.6-stretch"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: mongodb
+          containerPort: 27017
+          protocol: TCP
+        volumeMounts:
+        - name: mongodbdata
+          mountPath: /data/db
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            ephemeral-storage: 1Gi
+            memory: 256Mi
+
+      volumes:
+      - name: mongodbdata
+        persistentVolumeClaim:
+          claimName: mongodb-ska-dashboard-repo-test
 ---
 # Source: ska-tango-examples-test-parent/charts/ska-tango-base/templates/databaseds.yaml
 apiVersion: apps/v1
@@ -2370,6 +2674,193 @@ spec:
             memory: 256Mi
       volumes:
 ---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive-auth/templates/auth.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: webjive-auth-ska-webjive-auth-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: webjive-auth-ska-webjive-auth-test
+    chart: ska-webjive-auth-0.1.3
+    release: test
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: webjive-auth-ska-webjive-auth-test
+  serviceName: webjive-auth-ska-webjive-auth-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: webjive-auth-ska-webjive-auth-test
+        chart: ska-webjive-auth-0.1.3
+        release: test
+        heritage: Helm
+    spec:
+      containers:
+      - name: authserver
+        image: "artefact.skao.int/ska-webjive-auth:1.0.0-develop-30"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: authserver-tcp
+          containerPort: 8080
+          protocol: TCP
+        env:
+          - name: SECRET
+            value: "s3cr3t"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+      - name: redis
+        image: "redis:latest"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: redis-tcp
+          containerPort: 6379
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/tangogql.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tangogql-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: tangogql-ska-webjive-test
+    chart: ska-webjive-1.0.24
+    release: test
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: tangogql-ska-webjive-test
+  serviceName: tangogql-ska-webjive-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tangogql-ska-webjive-test
+        chart: ska-webjive-1.0.24
+        release: test
+        heritage: Helm
+    spec:
+      initContainers:
+      - name: waitdatabaseds
+        image: nexus.engageska-portugal.pt/ska-docker/tango-itango:latest
+        imagePullPolicy: IfNotPresent
+        command:
+          - /usr/local/bin/wait-for-it.sh
+          - tango-databaseds:10000
+          - --timeout=30
+          - --strict
+          - --
+          - echo "Databaseds ready for use."
+      containers:
+      - name: tangogql
+        image: "artefact.skao.int/ska-tangogql:1.1.0-develop-69"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - mountPath: /var/log/tangogql
+          name: tangogql-logs
+        - name: logging-config
+          mountPath: /app/logging.yaml
+          subPath: logging.yaml
+        env:
+          - name: LOG_PATH
+            value: "/var/log/tangogql"
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: TANGO_HOST
+            value: tango-databaseds:10000
+        ports:
+        - name: tangogql-tcp
+          containerPort: 5004
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 400m
+            memory: 1024Mi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+
+      volumes:
+      - name: logging-config
+        configMap:
+          name: tangogql-config-ska-webjive-test
+      - name: tangogql-logs
+        persistentVolumeClaim:
+          claimName: tangogql-ska-webjive-test
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/webjive.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: webjive-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  labels:
+    app: webjive-ska-webjive-test
+    chart: ska-webjive-1.0.24
+    release: test
+    heritage: Helm
+spec:
+  selector:
+    matchLabels:
+      app: webjive-ska-webjive-test
+  serviceName: webjive-ska-webjive-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: webjive-ska-webjive-test
+        chart: ska-webjive-1.0.24
+        release: test
+        heritage: Helm
+    spec:
+      containers:
+      - name: webjive
+        image: "artefact.skao.int/ska-webjive:1.1.2-develop-671"
+        imagePullPolicy: IfNotPresent
+        stdin: true
+        command: ["/bin/sh"]
+        args: ["-c", "sh /home/node/app/build.sh"]
+        env:
+          - name: PORT
+            value: "80"
+        ports:
+        - name: webjive-http
+          containerPort: 80
+          protocol: TCP
+        volumeMounts:
+        - name: package-build
+          mountPath: /home/node/app/build.sh
+          subPath: build.sh
+        resources:
+          limits:
+            cpu: 400m
+            memory: 1024Mi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+      volumes:
+      - name: package-build
+        configMap:
+          name: webjive-package-build-ska-webjive-test
+---
 # Source: ska-tango-examples-test-parent/charts/tango_example/templates/deviceservers.yaml
 apiVersion: apps/v1
 kind: StatefulSet
@@ -2434,7 +2925,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -2584,7 +3075,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -2735,7 +3226,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -2966,7 +3457,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3117,7 +3608,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3270,7 +3761,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3423,7 +3914,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3695,7 +4186,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3902,7 +4393,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4053,7 +4544,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4252,7 +4743,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4417,7 +4908,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4568,7 +5059,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4706,7 +5197,7 @@ spec:
     spec:
       containers:
         - name: event-generator
-          image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cb2a84ed3"
+          image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cda4c6daf"
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -5455,6 +5946,129 @@ spec:
             name: webjivetestdevice-test-dsconfig-json
       restartPolicy: Never
 ---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ska-dashboard-repo-ing-ska-dashboard-repo-test
+  namespace: ci-dev-ska-tango-examples
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - http:
+        paths:
+        - path: /(dashboards.*)
+          pathType: Prefix
+          backend:
+           service:
+            name: dashboards-ska-dashboard-repo-test
+            port:
+              number: 3012
+        - path: /(logs.*)
+          pathType: Prefix
+          backend:
+           service:
+            name: dashboards-ska-dashboard-repo-test
+            port:
+              number: 3012
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive-auth/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webjive-authserver-ing-ska-webjive-auth-test
+  namespace: ci-dev-ska-tango-examples
+  annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - http:
+        paths:
+        - path: /auth/(.*)
+          pathType: Prefix
+          backend:
+           service:
+            name: webjive-auth-ska-webjive-auth-test
+            port:
+              number: 8080
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/tangogql-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tangogql-ing-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - http:
+        
+        paths:
+        - path: /ci-dev-ska-tango-examples/taranta/(db.*)
+          pathType: Prefix
+          backend:
+           service:
+            name: tangogql-ska-webjive-test
+            port:
+              number: 5004
+        - path: /ci-dev-ska-tango-examples/taranta/(graphiql.*)
+          pathType: Prefix
+          backend:
+           service:
+            name: tangogql-ska-webjive-test
+            port:
+              number: 5004
+        - path: /ci-dev-ska-tango-examples/taranta/(socket.*)
+          pathType: Prefix
+          backend:
+           service:
+            name: tangogql-ska-webjive-test
+            port:
+              number: 5004
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/webjive-ingresses.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webjive-ing-ska-webjive-test
+  namespace: ci-dev-ska-tango-examples
+  annotations:
+      kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - http:
+        
+        paths:
+        - path: /ci-dev-ska-tango-examples/static
+          pathType: Prefix
+          backend:
+           service:
+            name: webjive-ska-webjive-test
+            port:
+              number: 80
+        - path: /ci-dev-ska-tango-examples/taranta
+          pathType: Prefix
+          backend:
+           service:
+            name: webjive-ska-webjive-test
+            port:
+              number: 80
+        - path: /ci-dev-ska-tango-examples/taranta/dashboard
+          pathType: Prefix
+          backend:
+           service:
+            name: webjive-ska-webjive-test
+            port:
+              number: 80
+---
+# Source: ska-tango-examples-test-parent/charts/ska-dashboard-repo/templates/ingress.yaml
+# Use NGINX
+---
 # Source: ska-tango-examples-test-parent/charts/ska-tango-base/templates/deviceservers.yaml
 ---
 ---
@@ -5466,6 +6080,15 @@ spec:
 
 
  # deviceservers
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive-auth/templates/ingress.yaml
+# Use NGINX
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/tangogql-ingress.yaml
+# Use NGINX
+---
+# Source: ska-tango-examples-test-parent/charts/ska-webjive/templates/webjive-ingresses.yaml
+# Use NGINX
 ---
 # Source: ska-tango-examples-test-parent/charts/tango_example/templates/deviceservers.yaml
 ---
