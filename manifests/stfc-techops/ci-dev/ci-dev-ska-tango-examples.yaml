@@ -1322,7 +1322,7 @@ metadata:
   namespace: ci-dev-ska-tango-examples
   labels:
     app: tangogql-ska-webjive-test
-    chart: ska-webjive-1.0.24
+    chart: ska-webjive-1.0.27
     release: test
     heritage: Helm
 spec:
@@ -1746,7 +1746,7 @@ metadata:
   namespace: ci-dev-ska-tango-examples
   labels:
     app: tangogql-ska-webjive-test
-    chart: ska-webjive-1.0.24
+    chart: ska-webjive-1.0.27
     release: test
     heritage: Helm
 spec:
@@ -1767,7 +1767,7 @@ metadata:
   namespace: ci-dev-ska-tango-examples
   labels:
     app: webjive-ska-webjive-test
-    chart: ska-webjive-1.0.24
+    chart: ska-webjive-1.0.27
     release: test
     heritage: Helm
 spec:
@@ -2504,7 +2504,7 @@ metadata:
   namespace: ci-dev-ska-tango-examples
   labels:
     app: tangogql-ska-webjive-test
-    chart: ska-webjive-1.0.24
+    chart: ska-webjive-1.0.27
     release: test
     heritage: Helm
 spec:
@@ -2517,13 +2517,13 @@ spec:
     metadata:
       labels:
         app: tangogql-ska-webjive-test
-        chart: ska-webjive-1.0.24
+        chart: ska-webjive-1.0.27
         release: test
         heritage: Helm
     spec:
       initContainers:
       - name: waitdatabaseds
-        image: nexus.engageska-portugal.pt/ska-docker/tango-itango:latest
+        image: artefact.skao.int/ska-tango-images-tango-itango:9.3.6
         imagePullPolicy: IfNotPresent
         command:
           - /usr/local/bin/wait-for-it.sh
@@ -2577,7 +2577,7 @@ metadata:
   namespace: ci-dev-ska-tango-examples
   labels:
     app: webjive-ska-webjive-test
-    chart: ska-webjive-1.0.24
+    chart: ska-webjive-1.0.27
     release: test
     heritage: Helm
 spec:
@@ -2590,13 +2590,13 @@ spec:
     metadata:
       labels:
         app: webjive-ska-webjive-test
-        chart: ska-webjive-1.0.24
+        chart: ska-webjive-1.0.27
         release: test
         heritage: Helm
     spec:
       containers:
       - name: webjive
-        image: "artefact.skao.int/ska-webjive:1.1.2-develop-671"
+        image: "artefact.skao.int/ska-webjive:1.1.5-develop-770"
         imagePullPolicy: IfNotPresent
         stdin: true
         command: ["/bin/sh"]
@@ -2688,7 +2688,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -2838,7 +2838,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -2989,7 +2989,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3220,7 +3220,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3371,7 +3371,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3524,7 +3524,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3677,7 +3677,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -3949,7 +3949,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4156,7 +4156,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4307,7 +4307,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4506,7 +4506,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4671,7 +4671,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4822,7 +4822,7 @@ spec:
           value: tango-databaseds:10000
       containers:
       - name: device-server
-        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+        image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
         imagePullPolicy: IfNotPresent
         command:
           - retry
@@ -4960,7 +4960,7 @@ spec:
     spec:
       containers:
         - name: event-generator
-          image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.c2adfd1ac"
+          image: "registry.gitlab.com/ska-telescope/ska-tango-examples/ska-tango-examples:0.4.19-dev.cf8665591"
           imagePullPolicy: IfNotPresent
           command:
             - sh
