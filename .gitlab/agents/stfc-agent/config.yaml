@@ -8,3 +8,4 @@ ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
   - id: ska-telescope/ska-tango-examples
+  - id: ska-telescope/ska-skampi
