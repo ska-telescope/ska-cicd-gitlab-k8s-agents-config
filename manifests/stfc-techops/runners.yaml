@@ -293,7 +293,7 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: k8srunner-agent
+          value: k8srunner
         - name: RUNNER_NAME
           value: SKA-K8s-Runner-Agent
         image: gitlab/gitlab-runner:alpine-v14.9.0
@@ -353,7 +353,7 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: k8srunner-agent
+          value: k8srunner
         - name: RUNNER_NAME
           value: SKA-K8s-Runner-Agent
         image: gitlab/gitlab-runner:alpine-v14.9.0
