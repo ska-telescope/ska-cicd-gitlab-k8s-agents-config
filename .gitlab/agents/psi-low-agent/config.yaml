@@ -8,3 +8,4 @@ ci_access:
   - id: ska-telescope/sdi/ska-cicd-stencil
   - id: ska-telescope/ska-low-cbf
   - id: ska-telescope/ska-skampi
+  - id: ska-telescope/ska-pst-recv
