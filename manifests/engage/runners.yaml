@@ -69,12 +69,10 @@ data:
           echo "Agent configuration detected, setting context and creating namespace."
           # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
           # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
-          cp $KUBECONFIG_ENGAGE $KUBECONFIG
+          # Deploy to STFC always!
+          # cp $KUBECONFIG_ENGAGE $KUBECONFIG
+          cp $KUBECONFIG_STFC $KUBECONFIG
           kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
-          if [[ ${K_DESC} -ne 0 ]] ; then
-            echo "creating namespace"
-            kubectl create namespace ${KUBE_NAMESPACE}
-          fi
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
           echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
@@ -295,7 +293,7 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: k8srunner-engage
+          value: k8srunner
         - name: RUNNER_NAME
           value: SKA-K8s-Runner-Engage
         image: gitlab/gitlab-runner:alpine-v14.9.0
