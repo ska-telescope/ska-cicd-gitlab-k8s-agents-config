@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   annotations: null
-  namespace: gitlab-1131
+  namespace: gitlab
   labels:
     app: gitlab-runner-gitlab-runner
     chart: gitlab-runner-0.39.0
@@ -19,7 +19,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
-  namespace: gitlab-1131
+  namespace: gitlab
 rules:
 - apiGroups:
   - ""
@@ -37,7 +37,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
-  namespace: gitlab-1131
+  namespace: gitlab
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -45,7 +45,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gitlab-runner-gitlab-runner
-  namespace: gitlab-1131
+  namespace: gitlab
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -56,7 +56,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
-  namespace: gitlab-1131
+  namespace: gitlab
 data:
   check-live: |
     #!/bin/bash
@@ -123,7 +123,7 @@ data:
         cpu_request_overwrite_max_allowed = "3000m"
         memory_request_overwrite_max_allowed = "8Gi"
         poll_timeout = 600
-        namespace = "gitlab-1131"
+        namespace = "gitlab"
         privileged = true
         protected = false
         pull_policy = ["always", "if-not-present"]
@@ -238,7 +238,7 @@ metadata:
   labels:
     app: gitlab-runner-metrics
   name: gitlab-runner-metrics
-  namespace: gitlab-1131
+  namespace: gitlab
 spec:
   ports:
   - name: metrics
@@ -259,7 +259,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
-  namespace: gitlab-1131
+  namespace: gitlab
 spec:
   replicas: 1
   revisionHistoryLimit: 10
