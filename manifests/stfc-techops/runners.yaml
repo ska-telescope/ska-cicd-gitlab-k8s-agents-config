@@ -128,8 +128,7 @@ data:
         Type = "s3"
         Shared = true
         [runners.cache.s3]
-          # TODO ST-1131: Change this to "minio" when the original runner is removed.
-          ServerAddress = "https://k8s.stfc.skao.int:9443"
+          ServerAddress = "minio"
           BucketName = "cache"
           BucketLocation = ""
           Insecure = true
