@@ -272,7 +272,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/configmap: 616e83e2a3ae91b9e13ba9365db5e730cde4f317b6fa6f02d25f3234d70e5bca
+        checksum/configmap: 1c5fbee44e81a0f9b61f1ab2d794ce600e5a287a50ca51767c337804cf63a8d3
         checksum/secrets: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
@@ -285,19 +285,19 @@ spec:
         vault.hashicorp.com/agent-inject-template-accesskey: |
           {{- with secret "stfc/gitlab-runner/s3_access_key" -}}
           {{- range $k, $v := .Data.data }}
-          {{ $v }}
+          {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-runner-registration-token: |
           {{- with secret "stfc/gitlab-runner/runner_registration_token" -}}
           {{- range $k, $v := .Data.data }}
-          {{ $v }}
+          {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-secretkey: |
           {{- with secret "stfc/gitlab-runner/s3_secret_key" -}}
           {{- range $k, $v := .Data.data }}
-          {{ $v }}
+          {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/role: kube-role
