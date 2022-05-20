@@ -1,21 +1,29 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: gitlab
+spec: {}
+status: {}
+---
+
+apiVersion: v1
 kind: ServiceAccount
 metadata:
-  annotations: null
-  namespace: gitlab
   labels:
     app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.39.0
+    chart: gitlab-runner-0.40.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
+  namespace: gitlab
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
     app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.39.0
+    chart: gitlab-runner-0.40.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
@@ -33,7 +41,7 @@ kind: RoleBinding
 metadata:
   labels:
     app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.39.0
+    chart: gitlab-runner-0.40.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
@@ -48,15 +56,6 @@ subjects:
   namespace: gitlab
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  labels:
-    app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.39.0
-    heritage: Helm
-    release: gitlab-runner
-  name: gitlab-runner-gitlab-runner
-  namespace: gitlab
 data:
   check-live: |
     #!/bin/bash
@@ -69,45 +68,50 @@ data:
     fi
   config.template.toml: |
     [[runners]]
-      pre_build_script = """
+    pre_build_script = """
         echo "This is a pre-build script for SKA."
         echo "Project: ${CI_PROJECT_NAME}"
         echo "Namespace: ${KUBE_NAMESPACE}"
         echo "Agent: ${SKA_AGENT_NAME}"
         if [[ -n "${SKA_AGENT_NAME}" ]]; then
-          echo "Agent configuration detected, setting context and creating namespace."
-          # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
-          # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
-          cp $KUBECONFIG_STFC $KUBECONFIG
+        echo "Agent configuration detected, setting context and creating namespace."
+        # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
+        # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+        cp $KUBECONFIG_STFC $KUBECONFIG
+        kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
+        if [[ ${K_DESC} -ne 0 ]] ; then
+            echo "creating namespace"
+            kubectl create namespace ${KUBE_NAMESPACE}
+        fi
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
-          echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
-          kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
-          if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]] ; then
-            kubectl describe namespace ${KUBE_NAMESPACE};
-          else
-            kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE}
-            kubectl create namespace ${KUBE_NAMESPACE}
-          fi
-          if [[ -n "${KUBE_NAMESPACE_SDP}" ]]; then
-            kubectl describe namespace ${KUBE_NAMESPACE_SDP} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
-            if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]] ; then
-              kubectl describe namespace ${KUBE_NAMESPACE_SDP};
+            echo "Applying Quotas to the SKAMPI pipeline namespace ${KUBE_NAMESPACE}."
+            kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
+            if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]]; then
+                kubectl describe namespace ${KUBE_NAMESPACE};
             else
-              kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE_SDP}
-              kubectl create namespace ${KUBE_NAMESPACE_SDP}
+                kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE}
+                kubectl create namespace ${KUBE_NAMESPACE};
             fi
-          fi
-          kubectl apply -f resources/namespace_with_quotas.yaml --namespace=${KUBE_NAMESPACE}
+            if [[ -n "${KUBE_NAMESPACE_SDP}" ]]; then
+                kubectl describe namespace ${KUBE_NAMESPACE_SDP} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
+                if [[ ${K_DESC} -eq 0 ]] && [[ ${KEEP_NAMESPACE} == "true" ]] ; then
+                    kubectl describe namespace ${KUBE_NAMESPACE_SDP}
+                else
+                    kubectl delete --ignore-not-found namespace ${KUBE_NAMESPACE_SDP}
+                    kubectl create namespace ${KUBE_NAMESPACE_SDP}
+                fi
+            fi
+            kubectl apply -f resources/namespace_with_quotas.yaml --namespace=${KUBE_NAMESPACE}
         else
-          echo "Nothing changed. You can ignore messages above this line."
-          if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} != staging* ]]; then
-            echo "Non-standard SKAMPI namespace detected, please contact System team."
-          fi
+            echo "Nothing changed. You can ignore messages above this line."
+            if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} != staging* ]]; then
+                echo "Non-standard SKAMPI namespace detected, please contact System team."
+            fi
         fi
-      """
-      [runners.kubernetes]
-        name = "SKA-K8s-Runner-Agent"
+    """
+    [runners.kubernetes]
+        name = "SKA-K8s-Runner"
         image = "ubuntu:20.04"
         helper_cpu_request = "100m"
         helper_memory_request = "128Mi"
@@ -122,22 +126,22 @@ data:
         privileged = true
         protected = false
         pull_policy = ["always", "if-not-present"]
-      [runners.kubernetes.node_selector]
+    [runners.kubernetes.node_selector]
         "node-role.skatelescope.org/ci-worker" = "true"
-      [runners.cache]
+    [runners.cache]
         Type = "s3"
         Shared = true
         [runners.cache.s3]
-          ServerAddress = "minio"
-          BucketName = "cache"
-          BucketLocation = ""
-          Insecure = true
-          AuthenticationType = "access-key"
-      [runners.kubernetes.volumes]
+        ServerAddress = "minio.gitlab.svc.cluster.local"
+        BucketName = "cache"
+        BucketLocation = ""
+        Insecure = true
+        AuthenticationType = "access-key"
+    [runners.kubernetes.volumes]
         [[runners.kubernetes.volumes.host_path]]
-          name = "docker"
-          mount_path = "/var/run/docker.sock"
-          host_path = "/var/run/docker.sock"
+        name = "docker"
+        mount_path = "/var/run/docker.sock"
+        host_path  = "/var/run/docker.sock"
   config.toml: |
     concurrent = 20
     check_interval = 3
@@ -149,7 +153,9 @@ data:
   entrypoint: |
     #!/bin/bash
     set -e
+
     mkdir -p /home/gitlab-runner/.gitlab-runner/
+
     cp /configmaps/config.toml /home/gitlab-runner/.gitlab-runner/
 
     # Set up environment variables for cache
@@ -225,6 +231,15 @@ data:
     done
 
     exit 0
+kind: ConfigMap
+metadata:
+  labels:
+    app: gitlab-runner-gitlab-runner
+    chart: gitlab-runner-0.40.1
+    heritage: Helm
+    release: gitlab-runner
+  name: gitlab-runner-gitlab-runner
+  namespace: gitlab
 ---
 apiVersion: v1
 kind: Service
@@ -236,7 +251,7 @@ metadata:
 spec:
   ports:
   - name: metrics
-    nodePort: 30929
+    nodePort: null
     port: 9252
     targetPort: metrics
   selector:
@@ -248,7 +263,7 @@ kind: Deployment
 metadata:
   labels:
     app: gitlab-runner-gitlab-runner
-    chart: gitlab-runner-0.39.0
+    chart: gitlab-runner-0.40.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner-gitlab-runner
@@ -262,13 +277,40 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/configmap: fa3dffecb2e95db384d3ec7f66d0bf1b9a9a58e5cdb3db26e35044a4b6681a63
-        checksum/secrets: 56d02c5a164e6651f5764da9302c6a0bf339747caf7bb5dca6511cbfa33fd367
+        checksum/configmap: 616e83e2a3ae91b9e13ba9365db5e730cde4f317b6fa6f02d25f3234d70e5bca
+        checksum/secrets: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
+        vault.hashicorp.com/agent-init-first: "true"
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-accesskey: stfc/gitlab-runner/s3_access_key
+        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc/gitlab-runner/runner_registration_token
+        vault.hashicorp.com/agent-inject-secret-secretkey: stfc/gitlab-runner/s3_secret_key
+        vault.hashicorp.com/agent-inject-status: update
+        vault.hashicorp.com/agent-inject-template-accesskey: |
+          {{- with secret "stfc/gitlab-runner/s3_access_key" -}}
+          {{- range $k, $v := .Data.data }}
+          {{ $v }}
+          {{- end }}
+          {{- end }}
+        vault.hashicorp.com/agent-inject-template-runner-registration-token: |
+          {{- with secret "stfc/gitlab-runner/runner_registration_token" -}}
+          {{- range $k, $v := .Data.data }}
+          {{ $v }}
+          {{- end }}
+          {{- end }}
+        vault.hashicorp.com/agent-inject-template-secretkey: |
+          {{- with secret "stfc/gitlab-runner/s3_secret_key" -}}
+          {{- range $k, $v := .Data.data }}
+          {{ $v }}
+          {{- end }}
+          {{- end }}
+        vault.hashicorp.com/role: kube-role
+        vault.hashicorp.com/secret-volume-path: /secrets
+        vault.hashicorp.com/secret-volume-path-runner-registration-token: /init-secrets
       labels:
         app: gitlab-runner-gitlab-runner
-        chart: gitlab-runner-0.39.0
+        chart: gitlab-runner-0.40.1
         heritage: Helm
         release: gitlab-runner
     spec:
@@ -288,10 +330,10 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: k8srunner
+          value: k8srunner,docker,docker-executor,ska
         - name: RUNNER_NAME
-          value: SKA-K8s-Runner-Agent
-        image: gitlab/gitlab-runner:alpine-v14.9.0
+          value: SKA-K8s-Runner
+        image: gitlab/gitlab-runner:alpine-v14.10.1
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
@@ -328,8 +370,6 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
-        - mountPath: /secrets
-          name: runner-secrets
         - mountPath: /home/gitlab-runner/.gitlab-runner
           name: etc-gitlab-runner
         - mountPath: /configmaps
@@ -348,24 +388,18 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: k8srunner
+          value: k8srunner,docker,docker-executor,ska
         - name: RUNNER_NAME
-          value: SKA-K8s-Runner-Agent
-        image: gitlab/gitlab-runner:alpine-v14.9.0
+          value: SKA-K8s-Runner
+        image: gitlab/gitlab-runner:alpine-v14.10.1
         imagePullPolicy: IfNotPresent
         name: configure
         resources: {}
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
-        - mountPath: /secrets
-          name: runner-secrets
-          readOnly: false
         - mountPath: /configmaps
           name: configmaps
-          readOnly: true
-        - mountPath: /init-secrets
-          name: init-runner-secrets
           readOnly: true
       nodeSelector:
         node-role.skatelescope.org/ci-worker: "true"
@@ -381,16 +415,9 @@ spec:
       - emptyDir:
           medium: Memory
         name: etc-gitlab-runner
-      - name: init-runner-secrets
-        projected:
-          sources:
-          - secret:
-              items:
-              - key: runner-registration-token
-                path: runner-registration-token
-              - key: runner-token
-                path: runner-token
-              name: gitlab-runner-gitlab-runner
+      - emptyDir:
+          medium: Memory
+        name: init-runner-secrets
       - configMap:
           name: gitlab-runner-gitlab-runner
         name: configmaps
