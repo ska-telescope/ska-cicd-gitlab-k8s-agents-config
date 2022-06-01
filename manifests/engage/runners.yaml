@@ -69,6 +69,7 @@ data:
           echo "Agent configuration detected, setting context and creating namespace."
           # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
           # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+          # Use our own kubeconfig to work around GitLab agent's incompatibility with `kubectl exec`. See https://gitlab.com/gitlab-org/gitlab/-/issues/346248
           cp $KUBECONFIG_ENGAGE $KUBECONFIG
           kubectl describe namespace ${KUBE_NAMESPACE} > /dev/null 2>&1 && K_DESC=$? || K_DESC=$?
           if [[ ${K_DESC} -ne 0 ]] ; then
