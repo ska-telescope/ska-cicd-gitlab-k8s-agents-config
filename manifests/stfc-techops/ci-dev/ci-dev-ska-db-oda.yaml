@@ -1,0 +1,699 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: button-dev-ska-db-oda
+spec: {}
+status: {}
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/charts/postgresql/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-postgresql
+  namespace: "button-dev-ska-db-oda"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.6.6
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/managed-by: Helm
+    app: ska-db-oda
+type: Opaque
+data:
+  postgres-password: "c3VwZXJzZWNyZXRwYXNzMTIzd29yZA=="
+  # We don't auto-generate LDAP password when it's not provided as we do for other passwords
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/pgadmin4.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ska-db-oda-pgadmine4-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-oda
+
+type: Opaque
+data:
+  password: "c3VwZXJzZWNyZXRwYXNzMTIzd29yZA=="
+  servers.json: "ewogICJTZXJ2ZXJzIjogeyJmaXJzdFNlcnZlciI6eyJHcm91cCI6IlNlcnZlcnMiLCJIb3N0IjoidGVzdC1wb3N0Z3Jlc3FsIiwiTWFpbnRlbmFuY2VEQiI6InBvc3RncmVzIiwiTmFtZSI6Ik9EQSIsIlBvcnQiOjU0MzIsIlNTTE1vZGUiOiJwcmVmZXIiLCJVc2VybmFtZSI6InBvc3RncmVzIn19Cn0="
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/environment.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ska-db-oda-environment-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component:  ska-db-oda
+    domain: environment
+    function: oda-environment
+    intent: production
+data:
+  ODA_BACKEND_TYPE: filesystem
+  ODA_DATA_DIR:  /var/lib/oda
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/initdb.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ska-db-oda-initdb
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+
+data:
+
+  create_tables.sql: |
+    CREATE TABLE vendors (
+                vendor_id SERIAL PRIMARY KEY,
+                vendor_name VARCHAR(255) NOT NULL
+            );
+    
+    CREATE TABLE parts (
+                    part_id SERIAL PRIMARY KEY,
+                    part_name VARCHAR(255) NOT NULL
+                    );
+    
+    CREATE TABLE part_drawings (
+                    part_id INTEGER PRIMARY KEY,
+                    file_extension VARCHAR(5) NOT NULL,
+                    drawing_data BYTEA NOT NULL,
+                    FOREIGN KEY (part_id)
+                    REFERENCES parts (part_id)
+                    ON UPDATE CASCADE ON DELETE CASCADE
+            );
+    
+    CREATE TABLE vendor_parts (
+                    vendor_id INTEGER NOT NULL,
+                    part_id INTEGER NOT NULL,
+                    PRIMARY KEY (vendor_id , part_id),
+                    FOREIGN KEY (vendor_id)
+                        REFERENCES vendors (vendor_id)
+                        ON UPDATE CASCADE ON DELETE CASCADE,
+                    FOREIGN KEY (part_id)
+                        REFERENCES parts (part_id)
+                        ON UPDATE CASCADE ON DELETE CASCADE
+            );
+    
+    
+
+  insert_entries.sql: |
+    
+    CREATE TABLE json_table (info jsonb NOT NULL);
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/nginx.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ska-db-oda-nginx-config-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes 1;
+    error_log nginx_error.log;
+    events {
+        # configuration of connection processing
+    }
+    http {
+      server {
+          listen 80;
+          server_name _;
+
+          location /button-dev-ska-db-oda/pgadmin4nginx/ {
+              proxy_set_header X-Script-Name /button-dev-ska-db-oda/pgadmin4nginx;
+              proxy_set_header Host $host;
+              proxy_pass http://ska-db-oda-pgadmine4-test/;
+              proxy_redirect off;
+          }
+      }
+    }
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/charts/postgresql/templates/primary/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-postgresql-hl
+  namespace: "button-dev-ska-db-oda"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.6.6
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/managed-by: Helm
+    app: ska-db-oda
+    app.kubernetes.io/component: primary
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/component: primary
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/charts/postgresql/templates/primary/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-postgresql
+  namespace: "button-dev-ska-db-oda"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.6.6
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/managed-by: Helm
+    app: ska-db-oda
+    app.kubernetes.io/component: primary
+  annotations:
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: "Cluster"
+  sessionAffinity: None
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/component: primary
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/nginx.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ska-db-oda-nginx-pgadmine4-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-nginx
+
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      protocol: TCP
+      name: http
+  selector:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-nginx
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/pgadmin4.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ska-db-oda-pgadmine4-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-oda
+
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      protocol: TCP
+      name: http
+  selector:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-oda
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/rest.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ska-db-oda-rest-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: rest
+    function: database
+    domain: operations
+    intent: production
+spec:
+  selector:
+    app: ska-db-oda
+    component: rest
+  ports:
+  - protocol: TCP
+    port: 5000
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/nginx.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ska-db-oda-nginx-pgadmine4-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-nginx
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: pgadmin4-nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:        
+        app: ska-db-oda
+        chart: ska-db-oda-0.2.1
+        release: test
+        heritage: Helm
+        system: db
+        subsystem: oda
+        component: pgadmin4-nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: config
+        configMap:
+          name: ska-db-oda-nginx-config-test
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/pgadmin4.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ska-db-oda-pgadmine4-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-oda
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:      
+      app: ska-db-oda
+      chart: ska-db-oda-0.2.1
+      release: test
+      heritage: Helm
+      system: db
+      subsystem: oda
+      component: pgadmin4-oda
+  template:
+    metadata:
+      labels:        
+        app: ska-db-oda
+        chart: ska-db-oda-0.2.1
+        release: test
+        heritage: Helm
+        system: db
+        subsystem: oda
+        component: pgadmin4-oda
+    
+    spec:
+      volumes:
+      - name: definitions
+        secret:
+          secretName: ska-db-oda-pgadmine4-test
+          items:
+          - key: servers.json
+            path: servers.json
+      containers:
+        - name: pgadmin4
+          image: "docker.io/dpage/pgadmin4:6.10"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: buttons@skao.int
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ska-db-oda-pgadmine4-test
+                  key: password
+            - name: PGADMIN_SERVER_JSON_FILE
+              value: /pgadmin4/servers.json
+          volumeMounts:
+          - name: definitions
+            mountPath: /pgadmin4/servers.json
+            subPath: servers.json
+          resources:
+            {}
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/charts/postgresql/templates/primary/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-postgresql
+  namespace: "button-dev-ska-db-oda"
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.6.6
+    app.kubernetes.io/instance: test
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+    app: ska-db-oda
+  annotations:
+spec:
+  replicas: 1
+  serviceName: test-postgresql-hl
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: test
+      app.kubernetes.io/component: primary
+  template:
+    metadata:
+      name: test-postgresql
+      labels:
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-11.6.6
+        app.kubernetes.io/instance: test
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: primary
+        app: ska-db-oda
+      annotations:
+    spec:
+      serviceAccountName: default
+      
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/instance: test
+                    app.kubernetes.io/component: primary
+                namespaces:
+                  - "button-dev-ska-db-oda"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+      hostNetwork: false
+      hostIPC: false
+      initContainers:
+      containers:
+        - name: postgresql
+          image: docker.io/bitnami/postgresql:14.3.0-debian-11-r3
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "true"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            # Authentication
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: test-postgresql
+                  key: postgres-password
+            # Replication
+            # Initdb
+            - name: POSTGRESQL_INITSCRIPTS_USERNAME
+              value: postgres
+            - name: POSTGRESQL_INITSCRIPTS_PASSWORD
+              value: "supersecretpass123word"
+            # Standby
+            # LDAP
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            # TLS
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            # Audit
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            # Others
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                
+                - |
+                  exec pg_isready -U "postgres" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+          resources:
+            limits: {}
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: custom-init-scripts
+              mountPath: /docker-entrypoint-initdb.d/
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
+      volumes:
+        - name: custom-init-scripts
+          configMap:
+            name: ska-db-oda-initdb
+        - name: dshm
+          emptyDir:
+            medium: Memory
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteMany"
+        resources:
+          requests:
+            storage: "12Gi"
+        storageClassName: nfss1
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/rest.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ska-db-oda-rest-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: rest
+    function: database
+    domain: operations
+    intent: production
+spec:
+  selector:
+    matchLabels:
+      app: ska-db-oda
+      component: rest
+  serviceName: rest-ska-db-oda-test
+  replicas: 1
+  template:
+    metadata:
+      labels:        
+        app: ska-db-oda
+        chart: ska-db-oda-0.2.1
+        release: test
+        heritage: Helm
+        system: db
+        subsystem: oda
+        component: rest
+        function: database
+        domain: operations
+        intent: production
+    spec:
+
+      containers:
+      - name: oda-rest
+        image: "artefact.skao.int/ska-db-oda:0.6.2"
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh"]
+        args: ["-c", "SCRIPT_NAME=/button-dev-ska-db-oda gunicorn --chdir src --bind 0.0.0.0:5000 --logger-class=ska_db_oda.rest.wsgi.UniformLogger --log-level='debug' ska_db_oda.rest.wsgi:app"]
+        envFrom:
+          - configMapRef:
+              name: ska-db-oda-environment-test
+        ports:
+          - name: oda-rest
+            containerPort: 5000
+
+        resources:
+          null
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/nginx.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ska-db-oda-pgadmine4-nginx-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4nginx-oda
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /button-dev-ska-db-oda/pgadmin4nginx
+            pathType: Prefix
+            backend:
+              service:
+                name:  ska-db-oda-nginx-pgadmine4-test
+                port:
+                  number: 80
+---
+# Source: ska-db-oda-umbrella/charts/ska-db-oda/templates/pgadmin4.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ska-db-oda-pgadmine4-test
+  namespace: button-dev-ska-db-oda
+  labels:    
+    app: ska-db-oda
+    chart: ska-db-oda-0.2.1
+    release: test
+    heritage: Helm
+    system: db
+    subsystem: oda
+    component: pgadmin4-oda
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Script-Name /button-dev-ska-db-oda/pgadmin4;
+
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /button-dev-ska-db-oda/pgadmin4
+            pathType: Prefix
+            backend:
+              service:
+                name: ska-db-oda-pgadmine4-test
+                port:
+                  number: 80
