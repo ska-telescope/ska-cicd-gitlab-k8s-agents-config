@@ -122,3 +122,16 @@ MINIO_PASSWORD=... # The MinIO Secret Key for GitLab Runners
 RUNNER_REGISTRATION_TOKEN=... # The runner registration token.
 NAMESPACE=... # The kubernetes namespace to install the secrets to. Defaults to `gitlab`.
 ```
+
+However, with the integration of Vault in our deployments it is now possible to deploy the Gitlab runners without having to explicitly create the necessary secrets, provided the manifest file retrieves from the Vault. To determine if the manifest file is obtaining the secrets from Vault just search for these [definitions](manifests/stfc-techops/runners.yaml#L286-306).
+
+Makefile Targets
+----------------
+
+Has shown in the previous sections, this repository makes use of several makefile targets that can be used to help deploy the Gitlab agent and runners. A list of these targets for ease of identification follows:
+
+- [make vars](Makefile#L14-22): Shows currently defined values for all the makefile variables.
+- [make generate-agent-manifest](Makefile#L24-29): Generates the Gitlab Agent deployment manifest using a pinned version.
+- [make agent](Makefile#L31-32): Deploys the manifest generated in the previous make target.
+- [make agent-runner-secrets](Makefile#L34-41): An auxiliary make target used to deploy the secrets needed by the Gitlab Runners to operate. **Only necessary if the Gitlab Runner manifest does not retrieve its secrets from Vault.**
+- [make help](Makefile#L31-32): Shows all the currently defined make targets and variables.
