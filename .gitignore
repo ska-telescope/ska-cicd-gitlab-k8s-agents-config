@@ -1,2 +1,5 @@
 PrivateRules.mak
 .vscode
+charts/*/charts/
+manifests.yaml
+charts/*/Chart.lock
