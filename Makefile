@@ -32,9 +32,9 @@ HELM_RELEASE=$(AGENT_NAME)
 K8S_CHART_PARAMS=  \
 	--namespace=$(KUBE_NAMESPACE) \
 	--create-namespace \
-	--set image.tag=$(AGENT_VERSION) \
-	--set config.token=$(AGENT_TOKEN) \
-	--set config.kasAddress=$(AGENT_KAS_ADDRESS)
+	--set gitlab-agent.image.tag=$(AGENT_VERSION) \
+	--set gitlab-agent.config.token=$(AGENT_TOKEN) \
+	--set gitlab-agent.config.kasAddress=$(AGENT_KAS_ADDRESS)
 
 HELM_CHARTS_TO_PUBLISH=## Empty: do not publish any chart
 
