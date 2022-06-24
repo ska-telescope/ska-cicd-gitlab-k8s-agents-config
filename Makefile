@@ -29,7 +29,7 @@ vars:  ## Prints all the defined variables and their values.
 
 # Set Chart Values
 HELM_RELEASE=$(AGENT_NAME)
-K8S_CHART_PARAMS=  \
+K8S_CHART_PARAMS= \
 	--namespace=$(KUBE_NAMESPACE) \
 	--create-namespace \
 	--set gitlab-agent.image.tag=$(AGENT_VERSION) \
@@ -37,6 +37,12 @@ K8S_CHART_PARAMS=  \
 	--set gitlab-agent.config.kasAddress=$(AGENT_KAS_ADDRESS)
 
 HELM_CHARTS_TO_PUBLISH=## Empty: do not publish any chart
+
+k8s-agent-upgrade:## Update an existing agent using old deployment
+	helm upgrade --install $(AGENT_NAME) charts/ska-cicd-gitlab-k8s-agents-config \
+		--namespace=$(KUBE_NAMESPACE) \
+		--set gitlab-agent.image.tag=$(AGENT_VERSION) \
+		--reuse-values
 
 agent-runner-secrets:  ## Deploys a secret object needed by Gitlab Runner instances not integrated with Vault.
 	kubectl create secret generic gitlab-runner-gitlab-runner \
