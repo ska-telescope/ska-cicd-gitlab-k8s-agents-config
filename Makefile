@@ -1,5 +1,5 @@
 AGENT_KAS_ADDRESS ?= wss://kas.gitlab.com
-AGENT_VERSION ?= v14.8.1## Get latest version from: https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/1706492?orderBy=NAME&sort=desc&search[]=
+AGENT_VERSION ?= v15.1.0## Get latest version from: https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/container_registry/1706492?orderBy=NAME&sort=desc&search[]=
 AGENT_TOKEN ?=
 NAMESPACE ?= gitlab
 MINIO_USERNAME ?=
