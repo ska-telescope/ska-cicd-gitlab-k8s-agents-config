@@ -224,9 +224,7 @@ metadata:
 webhooks:
   - name: vault.hashicorp.com
     failurePolicy: Ignore
-    matchPolicy: Exact
     sideEffects: None
-    timeoutSeconds: 30
     admissionReviewVersions: ["v1", "v1beta1"]
     clientConfig:
       service:
@@ -239,9 +237,3 @@ webhooks:
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
-    objectSelector:
-      matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: NotIn
-        values:
-        - vault-agent-injector
