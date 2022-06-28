@@ -160,7 +160,7 @@ spec:
             - name: AGENT_INJECT_VAULT_ADDR
               value: "https://vault-test-1.skao.int"
             - name: AGENT_INJECT_VAULT_AUTH_PATH
-              value: auth/stfc_sdhp
+              value: auth/sdhp
             - name: AGENT_INJECT_VAULT_IMAGE
               value: "hashicorp/vault:1.10.3"
             - name: AGENT_INJECT_TLS_AUTO
