@@ -275,24 +275,24 @@ spec:
         prometheus.io/scrape: "true"
         vault.hashicorp.com/agent-init-first: "true"
         vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/agent-inject-secret-accesskey: stfc/gitlab-runner/s3_access_key
-        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc/gitlab-runner/runner_registration_token
-        vault.hashicorp.com/agent-inject-secret-secretkey: stfc/gitlab-runner/s3_secret_key
+        vault.hashicorp.com/agent-inject-secret-accesskey: stfc_sdhp/gitlab-runner/s3_access_key
+        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc_sdhp/gitlab-runner/runner_registration_token
+        vault.hashicorp.com/agent-inject-secret-secretkey: stfc_sdhp/gitlab-runner/s3_secret_key
         vault.hashicorp.com/agent-inject-status: update
         vault.hashicorp.com/agent-inject-template-accesskey: |
-          {{- with secret "stfc/gitlab-runner/s3_access_key" -}}
+          {{- with secret "stfc_sdhp/gitlab-runner/s3_access_key" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-runner-registration-token: |
-          {{- with secret "stfc/gitlab-runner/runner_registration_token" -}}
+          {{- with secret "stfc_sdhp/gitlab-runner/runner_registration_token" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-secretkey: |
-          {{- with secret "stfc/gitlab-runner/s3_secret_key" -}}
+          {{- with secret "stfc_sdhp/gitlab-runner/s3_secret_key" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
