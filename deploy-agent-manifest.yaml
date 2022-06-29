@@ -1,0 +1,98 @@
+
+###
+# WARNING: output contains the agent token, which should be considered sensitive and never committed to source control
+###
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitlab
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-agent
+  namespace: gitlab
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitlab-agent-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: gitlab-agent
+  namespace: gitlab
+---
+apiVersion: v1
+data:
+  token: a1kzem0zWnFaR0hzVHV6eW81TG9CbzRnQ184cjF6VTFtNVFveURfRk5DcU5tTVFXeGc=
+kind: Secret
+metadata:
+  name: gitlab-agent-token-2252bg8hb4
+  namespace: gitlab
+type: Opaque
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-agent
+  namespace: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab-agent
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        app: gitlab-agent
+    spec:
+      containers:
+      - args:
+        - --token-file=/config/token
+        - --kas-address
+        - wss://kas.gitlab.com
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        image: registry.gitlab.com/gitlab-org/cluster-integration/gitlab-agent/agentk:v15.1.0
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: agent
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - mountPath: /config
+          name: token-volume
+      serviceAccountName: gitlab-agent
+      volumes:
+      - name: token-volume
+        secret:
+          secretName: gitlab-agent-token-2252bg8hb4

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   creationTimestamp: null
-  name: gitlab-runner-6cf02711
+  name: gitlab-runner-e9e1b1d6
 spec: {}
 status: {}
 ---
@@ -16,7 +16,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -27,7 +27,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 rules:
 - apiGroups:
   - ""
@@ -45,7 +45,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -53,7 +53,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gitlab-runner
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 ---
 apiVersion: v1
 data:
@@ -77,6 +77,10 @@ data:
         echo "Agent configuration detected, setting context and creating namespace."
         # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
         # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+        if [ -z "$KUBECONFIG" ]
+        then
+              KUBECONFIG=$(mktemp);
+        fi
         cp $KUBECONFIG_STFC_SDHP $KUBECONFIG # kubeconfig_name - Gitlab SKAO Group CI/CD file
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
@@ -117,7 +121,7 @@ data:
         cpu_request_overwrite_max_allowed = "3000m"
         memory_request_overwrite_max_allowed = "8Gi"
         poll_timeout = 600
-        namespace = "gitlab-runner-6cf02711"
+        namespace = "gitlab-runner-e9e1b1d6"
         privileged = true
         protected = false
         pull_policy = ["always", "if-not-present"]
@@ -231,7 +235,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 ---
 apiVersion: v1
 kind: Service
@@ -239,7 +243,7 @@ metadata:
   labels:
     app: gitlab-runner-metrics
   name: gitlab-runner-metrics
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 spec:
   ports:
   - name: metrics
@@ -259,7 +263,7 @@ metadata:
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
-  namespace: gitlab-runner-6cf02711
+  namespace: gitlab-runner-e9e1b1d6
 spec:
   replicas: 1
   revisionHistoryLimit: 10
@@ -269,30 +273,30 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/configmap: f7af097f4ea679530616e15ad729bef95c989914ba022ec287dc5f8ad73a1e54
+        checksum/configmap: e09498fbdfcf0d35e367b538f11f0f78bdb5335f5230408f3b58708dee78077e
         checksum/secrets: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
         vault.hashicorp.com/agent-init-first: "true"
         vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/agent-inject-secret-accesskey: stfc/gitlab-runner/s3_access_key
-        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc/gitlab-runner/runner_registration_token
-        vault.hashicorp.com/agent-inject-secret-secretkey: stfc/gitlab-runner/s3_secret_key
+        vault.hashicorp.com/agent-inject-secret-accesskey: stfc_sdhp/gitlab-runner/s3_access_key
+        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc_sdhp/gitlab-runner/runner_registration_token
+        vault.hashicorp.com/agent-inject-secret-secretkey: stfc_sdhp/gitlab-runner/s3_secret_key
         vault.hashicorp.com/agent-inject-status: update
         vault.hashicorp.com/agent-inject-template-accesskey: |
-          {{- with secret "stfc/gitlab-runner/s3_access_key" -}}
+          {{- with secret "stfc_sdhp/gitlab-runner/s3_access_key" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-runner-registration-token: |
-          {{- with secret "stfc/gitlab-runner/runner_registration_token" -}}
+          {{- with secret "stfc_sdhp/gitlab-runner/runner_registration_token" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-secretkey: |
-          {{- with secret "stfc/gitlab-runner/s3_secret_key" -}}
+          {{- with secret "stfc_sdhp/gitlab-runner/s3_secret_key" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
@@ -363,11 +367,9 @@ spec:
           capabilities:
             drop:
             - ALL
-          fsGroup: 65533
           privileged: false
           readOnlyRootFilesystem: false
           runAsNonRoot: true
-          runAsUser: 100
         volumeMounts:
         - mountPath: /home/gitlab-runner/.gitlab-runner
           name: etc-gitlab-runner
