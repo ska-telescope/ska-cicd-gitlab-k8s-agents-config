@@ -1,0 +1,5 @@
+# Mandatory parameters are set by Makefile
+# Further customisation options:
+#  - https://gitlab.com/gitlab-org/charts/gitlab-agent/-/blob/main/values.yaml
+gitlab-agent:
+  
