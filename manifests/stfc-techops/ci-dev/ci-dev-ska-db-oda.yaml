@@ -86,15 +86,15 @@ data:
     --Everything is in a text datatype for the initial release apart from the PK Id and info jsonb
     
     -- Placeholder for SBDs
-    CREATE TABLE tab_oda_sbd (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,sbd_id text NOT NULL,version text NOT NULL, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL)
+    CREATE TABLE tab_oda_sbd (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,sbd_id text NOT NULL,version text NOT NULL, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL);
     -- Placeholder for Projects
-    CREATE TABLE tab_oda_prj (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,prj_id text NOT NULL,version text NOT NULL, created_by text NOT NULL,created_on text NOT NULL, last_modified_on timestamp NOT NULL,last_modified_by text NOT NULL )
+    CREATE TABLE tab_oda_prj (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,prj_id text NOT NULL,version text NOT NULL, created_by text NOT NULL,created_on text NOT NULL, last_modified_on timestamp NOT NULL,last_modified_by text NOT NULL );
     -- Placeholder for Observation Programs
-    CREATE TABLE tab_oda_obs_prj (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,obs_prj_id text NOT NULL,version text NOT NULL, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL )
+    CREATE TABLE tab_oda_obs_prj (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,obs_prj_id text NOT NULL,version text NOT NULL, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL );
     -- Placeholder for SBIs
-    CREATE TABLE tab_oda_sbi (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,sbi_id text NOT NULL,version text default 1, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL )
+    CREATE TABLE tab_oda_sbi (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,sbi_id text NOT NULL,version text default 1, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL );
     -- Placeholder for Execution Blocks
-    CREATE TABLE tab_oda_exe_blk (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,exe_blk_id text NOT NULL,version text default 1, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL )
+    CREATE TABLE tab_oda_exe_blk (id serial NOT NULL PRIMARY KEY,info jsonb NOT NULL,exe_blk_id text NOT NULL,version text default 1, created_by text NOT NULL,created_on text NOT NULL, last_modified_on text NOT NULL,last_modified_by text NOT NULL );
     
 
   insert_entries.sql: |
@@ -498,7 +498,7 @@ spec:
 
       containers:
       - name: oda-rest
-        image: "registry.gitlab.com/ska-telescope/ska-db-oda/ska-db-oda:1.0.0-dev.c5bcab500"
+        image: "registry.gitlab.com/ska-telescope/ska-db-oda/ska-db-oda:1.0.0-dev.cff1b3868"
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: ["-c", "SCRIPT_NAME=/button-dev-ska-db-oda gunicorn --chdir src --bind 0.0.0.0:5000 --logger-class=ska_db_oda.rest.wsgi.UniformLogger --log-level='debug' ska_db_oda.rest.wsgi:app"]
