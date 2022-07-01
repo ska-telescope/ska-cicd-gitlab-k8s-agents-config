@@ -31,7 +31,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -51,7 +51,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -72,7 +72,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -187,7 +187,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -202,7 +202,7 @@ spec:
       name: http
   selector:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -217,7 +217,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -242,7 +242,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -254,7 +254,7 @@ spec:
   selector:
     matchLabels:      
       app: ska-db-oda
-      chart: ska-db-oda-0.2.1
+      chart: ska-db-oda-1.0.0
       release: test
       heritage: Helm
       system: db
@@ -264,7 +264,7 @@ spec:
     metadata:
       labels:        
         app: ska-db-oda
-        chart: ska-db-oda-0.2.1
+        chart: ska-db-oda-1.0.0
         release: test
         heritage: Helm
         system: db
@@ -482,7 +482,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
@@ -502,7 +502,7 @@ spec:
     metadata:
       labels:        
         app: ska-db-oda
-        chart: ska-db-oda-0.2.1
+        chart: ska-db-oda-1.0.0
         release: test
         heritage: Helm
         system: db
@@ -515,7 +515,7 @@ spec:
 
       containers:
       - name: oda-rest
-        image: "artefact.skao.int/ska-db-oda:0.6.2"
+        image: "registry.gitlab.com/ska-telescope/ska-db-oda/ska-db-oda:1.0.0-dev.c9f340c38"
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: ["-c", "SCRIPT_NAME=/button-dev-ska-db-oda gunicorn --chdir src --bind 0.0.0.0:5000 --logger-class=ska_db_oda.rest.wsgi.UniformLogger --log-level='debug' ska_db_oda.rest.wsgi:app"]
@@ -537,7 +537,7 @@ metadata:
   namespace: button-dev-ska-db-oda
   labels:    
     app: ska-db-oda
-    chart: ska-db-oda-0.2.1
+    chart: ska-db-oda-1.0.0
     release: test
     heritage: Helm
     system: db
