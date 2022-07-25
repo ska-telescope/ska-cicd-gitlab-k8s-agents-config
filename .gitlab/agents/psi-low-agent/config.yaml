@@ -6,7 +6,8 @@ gitops:
 ci_access:
   projects:
   - id: ska-telescope/sdi/ska-cicd-stencil
-  - id: ska-telescope/ska-low-cbf
   - id: ska-telescope/ska-skampi
   - id: ska-telescope/ska-pst-recv
   - id: ska-telescope/ska-pst-lmc
+  groups:
+  - id: ska-telescope/low-cbf
