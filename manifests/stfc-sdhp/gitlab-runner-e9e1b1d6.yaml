@@ -12,7 +12,7 @@ kind: ServiceAccount
 metadata:
   labels:
     app: gitlab-runner
-    chart: gitlab-runner-0.42.0
+    chart: gitlab-runner-0.43.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
@@ -23,7 +23,7 @@ kind: Role
 metadata:
   labels:
     app: gitlab-runner
-    chart: gitlab-runner-0.42.0
+    chart: gitlab-runner-0.43.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
@@ -41,7 +41,7 @@ kind: RoleBinding
 metadata:
   labels:
     app: gitlab-runner
-    chart: gitlab-runner-0.42.0
+    chart: gitlab-runner-0.43.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
@@ -77,10 +77,6 @@ data:
         echo "Agent configuration detected, setting context and creating namespace."
         # kubectl config use-context ${SKA_AGENT_URL}:${SKA_AGENT_NAME}
         # kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
-        if [ -z "$KUBECONFIG" ]
-        then
-              KUBECONFIG=$(mktemp);
-        fi
         cp $KUBECONFIG_STFC_SDHP $KUBECONFIG # kubeconfig_name - Gitlab SKAO Group CI/CD file
         fi
         if [[ ${CI_PROJECT_NAME} == "ska-skampi" ]] && [[ ${KUBE_NAMESPACE} == ci-* || ${KUBE_NAMESPACE} == integration-* ]]; then
@@ -231,7 +227,7 @@ kind: ConfigMap
 metadata:
   labels:
     app: gitlab-runner
-    chart: gitlab-runner-0.42.0
+    chart: gitlab-runner-0.43.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
@@ -247,7 +243,7 @@ metadata:
 spec:
   ports:
   - name: metrics
-    nodePort: 30931
+    nodePort: 30932
     port: 9252
     targetPort: metrics
   selector:
@@ -259,7 +255,7 @@ kind: Deployment
 metadata:
   labels:
     app: gitlab-runner
-    chart: gitlab-runner-0.42.0
+    chart: gitlab-runner-0.43.1
     heritage: Helm
     release: gitlab-runner
   name: gitlab-runner
@@ -273,30 +269,30 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/configmap: e09498fbdfcf0d35e367b538f11f0f78bdb5335f5230408f3b58708dee78077e
+        checksum/configmap: 0bda3a0d0184b419aaed5759430c84ee56dbb4f9b021e25cc88e524b8a9617c1
         checksum/secrets: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
         prometheus.io/port: "9252"
         prometheus.io/scrape: "true"
         vault.hashicorp.com/agent-init-first: "true"
         vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/agent-inject-secret-accesskey: stfc_sdhp/gitlab-runner/s3_access_key
-        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc_sdhp/gitlab-runner/runner_registration_token
-        vault.hashicorp.com/agent-inject-secret-secretkey: stfc_sdhp/gitlab-runner/s3_secret_key
+        vault.hashicorp.com/agent-inject-secret-accesskey: stfc/gitlab-runner/s3_access_key
+        vault.hashicorp.com/agent-inject-secret-runner-registration-token: stfc/gitlab-runner/runner_registration_token
+        vault.hashicorp.com/agent-inject-secret-secretkey: stfc/gitlab-runner/s3_secret_key
         vault.hashicorp.com/agent-inject-status: update
         vault.hashicorp.com/agent-inject-template-accesskey: |
-          {{- with secret "stfc_sdhp/gitlab-runner/s3_access_key" -}}
+          {{- with secret "stfc/gitlab-runner/s3_access_key" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-runner-registration-token: |
-          {{- with secret "stfc_sdhp/gitlab-runner/runner_registration_token" -}}
+          {{- with secret "stfc/gitlab-runner/runner_registration_token" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
           {{- end }}
         vault.hashicorp.com/agent-inject-template-secretkey: |
-          {{- with secret "stfc_sdhp/gitlab-runner/s3_secret_key" -}}
+          {{- with secret "stfc/gitlab-runner/s3_secret_key" -}}
           {{- range $k, $v := .Data.data }}
           {{- $v }}
           {{- end }}
@@ -305,7 +301,7 @@ spec:
         vault.hashicorp.com/secret-volume-path: /secrets
       labels:
         app: gitlab-runner
-        chart: gitlab-runner-0.42.0
+        chart: gitlab-runner-0.43.1
         heritage: Helm
         release: gitlab-runner
     spec:
@@ -325,10 +321,10 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: ska-ops-sandbox
+          value: ska-k8srunner-dp
         - name: RUNNER_NAME
           value: SKA-K8s-Runner-STFC-SDHP
-        image: registry.gitlab.com/gitlab-org/gitlab-runner:alpine-v15.1.0
+        image: registry.gitlab.com/gitlab-org/gitlab-runner:alpine-v15.2.1
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
