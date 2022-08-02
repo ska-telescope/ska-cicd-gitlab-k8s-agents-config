@@ -243,7 +243,7 @@ metadata:
 spec:
   ports:
   - name: metrics
-    nodePort: 30932
+    nodePort: 30931
     port: 9252
     targetPort: metrics
   selector:
@@ -321,7 +321,7 @@ spec:
         - name: REGISTER_LOCKED
           value: "false"
         - name: RUNNER_TAG_LIST
-          value: ska-k8srunner-dp
+          value: ska-ops-sandbox, ska-k8srunner-dp
         - name: RUNNER_NAME
           value: SKA-K8s-Runner-STFC-SDHP
         image: registry.gitlab.com/gitlab-org/gitlab-runner:alpine-v15.2.1
